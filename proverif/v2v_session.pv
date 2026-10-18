@@ -1,0 +1,49 @@
+(* ML-KEM-based mutual authentication and session-key establishment between two CAVs. *)
+(* Assumptions: pseudonyms are certificate-bound to ML-DSA verification keys; the public channel
+   is controlled by a Dolev-Yao attacker; fresh nonces and AEAD associated data prevent replay/tampering. *)
+(* Run: proverif proverif/v2v_session.pv
+   Expected result: authentication, integrity and session-key queries are true.
+   The private probe is the ProVerif secrecy sanity query; event queries bind derived keys. *)
+
+free c: channel. type secretkey. type publickey. type nonce. type sessionkey. type pseudonym.
+fun ok(): bitstring.
+fun zero(): bitstring.
+fun spk(secretkey): publickey.
+fun kem_public(secretkey): bitstring.
+free secret_probe: sessionkey [private].
+fun sign(bitstring,secretkey): bitstring.
+reduc forall m:bitstring,s:secretkey; foobar(sign(m,s),m,spk(s)) = ok().
+fun encaps(bitstring,nonce): bitstring.
+fun kem_shared(nonce):sessionkey.
+reduc forall s:secretkey,n:nonce; decaps(encaps(kem_public(s),n),s)=kem_shared(n).
+fun transcript(pseudonym,pseudonym,bitstring,bitstring,nonce,bitstring): bitstring.
+fun aead(sessionkey,bitstring,bitstring): bitstring.
+reduc forall k:sessionkey,m:bitstring,ad:bitstring; open(k,aead(k,m,ad),ad)=m.
+
+event a_hello(pseudonym,nonce). event b_verified(pseudonym,nonce). event a_verified(pseudonym,nonce).
+event shared_session(pseudonym,pseudonym,sessionkey). event integrity_checked(pseudonym,pseudonym,bitstring).
+
+query attacker(secret_probe).
+query a,b:pseudonym,n:nonce; inj-event(b_verified(a,n)) ==> inj-event(a_hello(a,n)).
+query a,b:pseudonym,n1:nonce,n2:nonce; inj-event(a_verified(b,n2)) ==> inj-event(b_verified(a,n1)).
+query a,b:pseudonym,k:sessionkey,n:nonce; inj-event(shared_session(a,b,k)) ==> inj-event(a_verified(b,n)).
+query a,b:pseudonym,m:bitstring,k:sessionkey; inj-event(integrity_checked(a,b,m)) ==> inj-event(shared_session(a,b,k)).
+
+let initiator(ask:secretkey,bsk:secretkey,p:pseudonym,q:pseudonym) =
+  new na:nonce; let ek=kem_public(ask) in let h1=transcript(p,q,ek,zero(),na,zero()) in
+  event a_hello(p,na); out(c,(p,q,ek,na,sign(h1,ask)));
+  in(c,(ct:bitstring,nb:nonce,sigb:bitstring)); let h2=transcript(q,p,ct,ek,nb,zero()) in
+  if foobar(sigb,h2,spk(bsk)) = ok() then event a_verified(q,nb);
+    let k=decaps(ct,ask) in event shared_session(p,q,k);
+    in(c,(cipher:bitstring,ad:bitstring)); let m=open(k,cipher,ad) in event integrity_checked(p,q,m).
+
+let responder(bsk:secretkey,ask:secretkey,p:pseudonym,q:pseudonym) =
+  in(c,(p1:pseudonym,q1:pseudonym,ek:bitstring,na:nonce,siga:bitstring));
+  let h1=transcript(p1,q1,ek,zero(),na,zero()) in
+  if foobar(siga,h1,spk(ask)) = ok() then event b_verified(p1,na); new nb:nonce;
+    let ct=encaps(ek,nb) in let h2=transcript(q,p1,ct,ek,nb,zero()) in
+    out(c,(ct,nb,sign(h2,bsk))); let k=kem_shared(nb) in new m:bitstring;
+    let ad=transcript(p1,q,ct,zero(),na,zero()) in out(c,(aead(k,m,ad),ad)).
+
+process new ask:secretkey; new bsk:secretkey; new ap:pseudonym; new bp:pseudonym;
+  ((initiator(ask,bsk,ap,bp)) | (responder(bsk,ask,ap,bp)))

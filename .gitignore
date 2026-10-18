@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.py[cod]
+.vendor/
+results/*
+!results/.gitkeep
+reports/static_ablation/candidate_*/
+artifacts/models/*.pt
+data/raw/

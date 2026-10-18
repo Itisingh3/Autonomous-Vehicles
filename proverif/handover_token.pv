@@ -1,0 +1,56 @@
+(* Mobility-aware, ML-DSA-signed, short-lived handover-token-based re-authentication between RSUs. *)
+(* Assumptions: current and next RSUs are registered; rsu_channel is an authenticated protected
+   RSU-to-RSU channel; expiry, destination binding, one-time nonces and clock checks are enforced. *)
+(* Run: proverif proverif/handover_token.pv
+   Expected result: token-authentication, replay/integrity and session-key queries are true.
+   The private probe is the ProVerif secrecy sanity query; event queries bind derived keys. *)
+
+free c: channel. type secretkey. type publickey. type nonce. type timestamp.
+type contextkey. type sessionkey. type pseudonym.
+fun ok(): bitstring.
+fun zero(): bitstring.
+free rsu_channel: contextkey [private].
+free secret_probe: sessionkey [private].
+fun spk(secretkey): publickey.
+fun kem_public(secretkey): bitstring.
+fun sign(bitstring,secretkey): bitstring.
+reduc forall m:bitstring,s:secretkey; foobar(sign(m,s),m,spk(s)) = ok().
+fun kdf(sessionkey,bitstring): contextkey.
+fun aead(contextkey,contextkey,bitstring): bitstring.
+reduc forall k:contextkey,m:contextkey,ad:bitstring; open(k,aead(k,m,ad),ad)=m.
+fun token(pseudonym,bitstring,contextkey,timestamp,timestamp,nonce):bitstring.
+fun handover_key(contextkey,nonce,nonce,timestamp):sessionkey.
+
+event token_issued(pseudonym,nonce,timestamp). event token_received(pseudonym,nonce,timestamp).
+event vehicle_handover_verified(pseudonym,nonce). event next_rsu_verified(pseudonym,nonce).
+event handover_session(pseudonym,sessionkey).
+
+query attacker(secret_probe).
+query p:pseudonym,n:nonce,ex:timestamp; inj-event(next_rsu_verified(p,n)) ==> inj-event(token_issued(p,n,ex)).
+query p:pseudonym,nv:nonce,ho:nonce,ex:timestamp; inj-event(vehicle_handover_verified(p,nv)) ==> inj-event(token_received(p,ho,ex)).
+query p:pseudonym,k:sessionkey,n:nonce; inj-event(handover_session(p,k)) ==> inj-event(vehicle_handover_verified(p,n)).
+
+let current_rsu(ask:secretkey,p:pseudonym,old:sessionkey,next:bitstring) =
+  new ho:nonce; new issued:timestamp; new expiry:timestamp; let ctx=kdf(old,zero()) in
+  let tk=token(p,next,ctx,issued,expiry,ho) in event token_issued(p,ho,expiry);
+  out(c,(p,next,issued,expiry,ho,sign(tk,ask),aead(rsu_channel,ctx,zero()))); in(c,(ack:bitstring)); 0.
+
+let vehicle(vsk:secretkey,source:secretkey,p:pseudonym,old:sessionkey) =
+  in(c,(p2:pseudonym,next:bitstring,issued:timestamp,expiry:timestamp,ho:nonce,ts:bitstring,enc:bitstring));
+  let ctx=kdf(old,zero()) in let tk=token(p2,next,ctx,issued,expiry,ho) in
+  if foobar(ts,tk,spk(source)) = ok() then event token_received(p2,ho,expiry); new nv:nonce; new now:timestamp;
+    let req=token(p2,next,ctx,now,expiry,nv) in out(c,(p2,next,ho,nv,sign(req,vsk)));
+    event vehicle_handover_verified(p2,nv); in(c,(nr:nonce));
+    let k=handover_key(ctx,nv,nr,now) in event handover_session(p2,k).
+
+let next_rsu(bsk:secretkey,ask:secretkey,vsk:secretkey) =
+  in(c,(p:pseudonym,next:bitstring,issued:timestamp,expiry:timestamp,ho:nonce,ts:bitstring,enc:bitstring));
+  let ctx=open(rsu_channel,enc,zero()) in
+  if foobar(ts,token(p,next,ctx,issued,expiry,ho),spk(ask)) = ok() then
+    in(c,(p3:pseudonym,next3:bitstring,ho3:nonce,nv:nonce,sigv:bitstring));
+    if p3=p then if next3=next then
+      if foobar(sigv,token(p3,next3,ctx,issued,expiry,nv),spk(vsk)) = ok() then
+        event next_rsu_verified(p3,nv); new nr:nonce; out(c,nr); out(c,zero()).
+
+process new ask:secretkey; new bsk:secretkey; new vsk:secretkey; new p:pseudonym; new old:sessionkey;
+  ((current_rsu(ask,p,old,kem_public(bsk))) | (vehicle(vsk,ask,p,old)) | (next_rsu(bsk,ask,vsk)))

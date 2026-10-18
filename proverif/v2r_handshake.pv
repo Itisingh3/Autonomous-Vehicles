@@ -1,0 +1,52 @@
+(* ML-KEM-based mutual authentication and session-key establishment between a CAV and an RSU. *)
+(* Assumptions: ML-KEM-768 and ML-DSA-65 are ideal symbolic primitives; certificates bind
+   pseudonyms to verification keys; the public channel is controlled by a Dolev-Yao attacker;
+   fresh timestamps/nonces are checked for freshness by the executable implementation. *)
+(* Run: proverif proverif/v2r_handshake.pv
+   Expected result: all secrecy/authentication queries are true under these assumptions.
+   The private probe is the ProVerif secrecy sanity query; event queries bind derived keys. *)
+
+free c: channel.
+type secretkey. type publickey. type nonce. type sessionkey. type pseudonym. type timestamp.
+fun ok(): bitstring.
+fun zero(): bitstring.
+free secret_probe: sessionkey [private].
+fun spk(secretkey): publickey.
+fun kem_public(secretkey): bitstring.
+fun sign(bitstring, secretkey): bitstring.
+reduc forall m:bitstring, s:secretkey; foobar(sign(m,s),m,spk(s)) = ok().
+fun encaps(bitstring, nonce): bitstring.
+fun kem_shared(nonce): sessionkey.
+reduc forall s:secretkey, n:nonce; decaps(encaps(kem_public(s),n),s) = kem_shared(n).
+fun transcript(pseudonym,bitstring,nonce,timestamp,bitstring): bitstring.
+fun finished(sessionkey,bitstring): bitstring.
+
+event vehicle_hello(pseudonym, nonce, timestamp). event rsu_hello(pseudonym, nonce, timestamp).
+event vehicle_verified(pseudonym, nonce). event rsu_verified(pseudonym, nonce).
+event vehicle_finished(pseudonym, sessionkey). event rsu_session(pseudonym, sessionkey).
+
+query attacker(secret_probe).
+query p:pseudonym,n:nonce,t:timestamp; inj-event(rsu_verified(p,n)) ==> inj-event(vehicle_hello(p,n,t)).
+query p:pseudonym,n:nonce,t:timestamp; inj-event(vehicle_verified(p,n)) ==> inj-event(rsu_hello(p,n,t)).
+query p:pseudonym,k:sessionkey,n:nonce; inj-event(rsu_session(p,k)) ==> inj-event(rsu_verified(p,n)).
+
+let vehicle(vsk:secretkey, rsk:secretkey, p:pseudonym) =
+  new nv:nonce; new tv:timestamp; let ek=kem_public(vsk) in
+  let h1=transcript(p,ek,nv,tv,zero()) in
+  event vehicle_hello(p,nv,tv); out(c,(p,ek,nv,tv,sign(h1,vsk)));
+  in(c,(rid:bitstring,ct:bitstring,nr:nonce,tr:timestamp,sigr:bitstring));
+  let h2=transcript(p,ct,nr,tr,h1) in
+  if foobar(sigr,h2,spk(rsk)) = ok() then event vehicle_verified(p,nr);
+    let k=decaps(ct,vsk) in let f=finished(k,h2) in out(c,(p,f)); event vehicle_finished(p,k).
+
+let rsu(rsk:secretkey, vsk:secretkey) =
+  in(c,(p:pseudonym,ek:bitstring,nv:nonce,tv:timestamp,sigv:bitstring));
+  let h1=transcript(p,ek,nv,tv,zero()) in
+  if foobar(sigv,h1,spk(vsk)) = ok() then event rsu_verified(p,nv); new nr:nonce; new tr:timestamp;
+    let ct=encaps(ek,nr) in let h2=transcript(p,ct,nr,tr,h1) in
+    event rsu_hello(p,nr,tr); out(c,(zero(),ct,nr,tr,sign(h2,rsk)));
+    in(c,(p2:pseudonym,f:bitstring)); let k=kem_shared(nr) in
+    if p2=p then if f=finished(k,h2) then event rsu_session(p,k).
+
+process new vsk:secretkey; new rsk:secretkey; new p:pseudonym;
+  ((vehicle(vsk,rsk,p)) | (rsu(rsk,vsk)))
