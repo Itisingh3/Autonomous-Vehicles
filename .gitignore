@@ -2,7 +2,7 @@
 __pycache__/
 *.py[cod]
 .vendor/
-results/*
+# results/*
 !results/.gitkeep
 reports/static_ablation/candidate_*/
 artifacts/models/*.pt

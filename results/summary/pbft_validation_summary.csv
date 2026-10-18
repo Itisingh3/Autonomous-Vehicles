@@ -1,0 +1,13 @@
+mode,scenario,n_seeds,consensus_latency_ms_mean,consensus_latency_ms_ci95,consensus_messages_per_transaction_mean,consensus_messages_per_transaction_ci95,detection_rate_mean,detection_rate_ci95,false_positive_rate_mean,false_positive_rate_ci95,false_negative_rate_mean,false_negative_rate_ci95,time_to_quarantine_mean,time_to_quarantine_ci95,time_to_revoke_mean,time_to_revoke_ci95,recovery_time_mean,recovery_time_ci95
+standard_pbft,honest,20,5.458490064695423,0.13542290750890565,45.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1.0,0.0,-1.0,0.0,-1.0,0.0
+reputation_pbft,honest,20,4.803471256931972,0.11917215860783699,45.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1.0,0.0,-1.0,0.0,-1.0,0.0
+standard_pbft,suspicious,20,5.458490064695423,0.13542290750890565,45.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1.0,0.0,-1.0,0.0,-1.0,0.0
+reputation_pbft,suspicious,20,4.803471256931972,0.11917215860783699,45.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1.0,0.0,-1.0,0.0,-1.0,0.0
+standard_pbft,quarantined,20,5.458490064695423,0.13542290750890565,45.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,6.0,0.0,-1.0,0.0,-1.0,0.0
+reputation_pbft,quarantined,20,4.803471256931972,0.11917215860783699,45.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,6.0,0.0,-1.0,0.0,-1.0,0.0
+standard_pbft,revoked,20,5.458490064695423,0.13542290750890565,45.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,5.0,0.0,5.0,0.0,-1.0,0.0
+reputation_pbft,revoked,20,4.803471256931972,0.11917215860783699,45.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,5.0,0.0,5.0,0.0,-1.0,0.0
+standard_pbft,temporary_fault,20,5.458490064695423,0.13542290750890565,45.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1.0,0.0,-1.0,0.0,-1.0,0.0
+reputation_pbft,temporary_fault,20,4.803471256931972,0.11917215860783699,45.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,-1.0,0.0,-1.0,0.0,-1.0,0.0
+standard_pbft,honest_then_malicious,20,5.458490064695423,0.13542290750890565,45.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,51.0,0.0,51.0,0.0,-1.0,0.0
+reputation_pbft,honest_then_malicious,20,4.803471256931972,0.11917215860783699,45.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,51.0,0.0,51.0,0.0,-1.0,0.0
