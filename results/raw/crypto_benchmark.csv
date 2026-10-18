@@ -1,0 +1,7 @@
+algorithm,operation,repetitions,mean_us,median_us,stddev_us,ci95_halfwidth_us,success_count
+ML-KEM-768,key_generation,1000,12.2327,11.602,2.72419,0.168847,1000
+ML-KEM-768,encapsulation,1000,12.2705,12.003,1.7252,0.106929,1000
+ML-KEM-768,decapsulation,1000,15.0218,14.748,2.55841,0.158572,1000
+ML-DSA-65,key_generation,1000,40.9288,40.006,3.21535,0.199289,1000
+ML-DSA-65,signing,1000,107.354,86.494,66.022,4.09209,1000
+ML-DSA-65,verification,1000,39.0952,38.402,2.63676,0.163428,1000

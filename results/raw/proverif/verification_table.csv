@@ -1,0 +1,4 @@
+model,queries,result,output_file,execution_environment
+v2r_handshake,4/4,true,results/raw/proverif/v2r_handshake.out.txt,Windows ProVerif 2.05
+handover_token,4/4,true,results/raw/proverif/handover_token.out.txt,Windows ProVerif 2.05
+v2v_session,5/5,true,results/raw/proverif/v2v_session.out.txt,Windows ProVerif 2.05

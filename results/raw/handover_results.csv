@@ -1,0 +1,2 @@
+run,full_handshake_latency_s,handover_latency_s,handover_success,fallback_used
+0,0.0183647,0.00503833,1,0

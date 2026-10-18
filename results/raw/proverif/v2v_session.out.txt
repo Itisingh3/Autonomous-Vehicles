@@ -1,0 +1,149 @@
+Process 0 (that is, the initial process):
+{1}new ask: secretkey;
+{2}new bsk: secretkey;
+{3}new ap: pseudonym;
+{4}new bp: pseudonym;
+(
+    {5}let ask_1: secretkey = ask in
+    {6}let bsk_1: secretkey = bsk in
+    {7}let p: pseudonym = ap in
+    {8}let q: pseudonym = bp in
+    {9}new na: nonce;
+    {10}let ek: bitstring = kem_public(ask_1) in
+    {11}let h1: bitstring = transcript(p,q,ek,zero,na,zero) in
+    {12}event a_hello(p,na);
+    {13}out(c, (p,q,ek,na,sign(h1,ask_1)));
+    {14}in(c, (ct: bitstring,nb: nonce,sigb: bitstring));
+    {15}let h2: bitstring = transcript(q,p,ct,ek,nb,zero) in
+    {16}if (foobar(sigb,h2,spk(bsk_1)) = ok) then
+    {17}event a_verified(q,nb);
+    {18}let k: sessionkey = decaps(ct,ask_1) in
+    {19}event shared_session(p,q,k);
+    {20}in(c, (cipher: bitstring,ad: bitstring));
+    {21}let m: bitstring = open(k,cipher,ad) in
+    {22}event integrity_checked(p,q,m)
+) | (
+    {23}let bsk_2: secretkey = bsk in
+    {24}let ask_2: secretkey = ask in
+    {25}let p_1: pseudonym = ap in
+    {26}let q_1: pseudonym = bp in
+    {27}in(c, (p1: pseudonym,q1: pseudonym,ek_1: bitstring,na_1: nonce,siga: bitstring));
+    {28}let h1_1: bitstring = transcript(p1,q1,ek_1,zero,na_1,zero) in
+    {29}if (foobar(siga,h1_1,spk(ask_2)) = ok) then
+    {30}event b_verified(p1,na_1);
+    {31}new nb_1: nonce;
+    {32}let ct_1: bitstring = encaps(ek_1,nb_1) in
+    {33}let h2_1: bitstring = transcript(q_1,p1,ct_1,ek_1,nb_1,zero) in
+    {34}out(c, (ct_1,nb_1,sign(h2_1,bsk_2)));
+    {35}let k_1: sessionkey = kem_shared(nb_1) in
+    {36}new m_1: bitstring;
+    {37}let ad_1: bitstring = transcript(p1,q_1,ct_1,zero,na_1,zero) in
+    {38}out(c, (aead(k_1,m_1,ad_1),ad_1))
+)
+
+--  Process 1 (that is, process 0, with let moved downwards):
+{1}new ask: secretkey;
+{2}new bsk: secretkey;
+{3}new ap: pseudonym;
+{4}new bp: pseudonym;
+(
+    {9}new na: nonce;
+    {7}let p: pseudonym = ap in
+    {12}event a_hello(p,na);
+    {5}let ask_1: secretkey = ask in
+    {10}let ek: bitstring = kem_public(ask_1) in
+    {8}let q: pseudonym = bp in
+    {11}let h1: bitstring = transcript(p,q,ek,zero,na,zero) in
+    {13}out(c, (p,q,ek,na,sign(h1,ask_1)));
+    {14}in(c, (ct: bitstring,nb: nonce,sigb: bitstring));
+    {15}let h2: bitstring = transcript(q,p,ct,ek,nb,zero) in
+    {6}let bsk_1: secretkey = bsk in
+    {16}if (foobar(sigb,h2,spk(bsk_1)) = ok) then
+    {17}event a_verified(q,nb);
+    {18}let k: sessionkey = decaps(ct,ask_1) in
+    {19}event shared_session(p,q,k);
+    {20}in(c, (cipher: bitstring,ad: bitstring));
+    {21}let m: bitstring = open(k,cipher,ad) in
+    {22}event integrity_checked(p,q,m)
+) | (
+    {27}in(c, (p1: pseudonym,q1: pseudonym,ek_1: bitstring,na_1: nonce,siga: bitstring));
+    {28}let h1_1: bitstring = transcript(p1,q1,ek_1,zero,na_1,zero) in
+    {24}let ask_2: secretkey = ask in
+    {29}if (foobar(siga,h1_1,spk(ask_2)) = ok) then
+    {30}event b_verified(p1,na_1);
+    {31}new nb_1: nonce;
+    {32}let ct_1: bitstring = encaps(ek_1,nb_1) in
+    {26}let q_1: pseudonym = bp in
+    {33}let h2_1: bitstring = transcript(q_1,p1,ct_1,ek_1,nb_1,zero) in
+    {23}let bsk_2: secretkey = bsk in
+    {34}out(c, (ct_1,nb_1,sign(h2_1,bsk_2)));
+    {36}new m_1: bitstring;
+    {37}let ad_1: bitstring = transcript(p1,q_1,ct_1,zero,na_1,zero) in
+    {35}let k_1: sessionkey = kem_shared(nb_1) in
+    {38}out(c, (aead(k_1,m_1,ad_1),ad_1))
+)
+
+-- Query not attacker(secret_probe[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(secret_probe[])
+RESULT not attacker(secret_probe[]) is true.
+-- Query inj-event(b_verified(a,n)) ==> inj-event(a_hello(a,n)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(b_verified(a,n)) ==> inj-event(a_hello(a,n))
+goal reachable: b-inj-event(a_hello(ap[],na[]),@occ12[]) -> inj-event(b_verified(ap[],na[]),@occ30_1)
+The hypothesis occurs strictly before the conclusion.
+Abbreviations:
+@occ30_1 = @occ30[siga = sign(transcript(ap[],bp[],kem_public(ask[]),zero,na[],zero),ask[]),na_1 = na[],ek_1 = kem_public(ask[]),q1 = bp[],p1 = ap[]]
+RESULT inj-event(b_verified(a,n)) ==> inj-event(a_hello(a,n)) is true.
+-- Query inj-event(a_verified(b,n2)) ==> inj-event(b_verified(a,n1)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(a_verified(b,n2)) ==> inj-event(b_verified(a,n1))
+goal reachable: b-inj-event(b_verified(ap[],na[]),@occ30_2) -> inj-event(a_verified(bp[],nb_2),@occ17_1)
+The hypothesis occurs strictly before the conclusion.
+Abbreviations:
+nb_2 = nb_1[siga = sign(transcript(ap[],bp[],kem_public(ask[]),zero,na[],zero),ask[]),na_1 = na[],ek_1 = kem_public(ask[]),q1 = bp[],p1 = ap[]]
+@occ17_1 = @occ17[sigb = sign(transcript(bp[],ap[],encaps(kem_public(ask[]),nb_2),kem_public(ask[]),nb_2,zero),bsk[]),nb = nb_2,ct = encaps(kem_public(ask[]),nb_2)]
+@occ30_2 = @occ30_1[siga = sign(transcript(ap[],bp[],kem_public(ask[]),zero,na[],zero),ask[]),na_1 = na[],ek_1 = kem_public(ask[]),q1 = bp[],p1 = ap[]]
+RESULT inj-event(a_verified(b,n2)) ==> inj-event(b_verified(a,n1)) is true.
+-- Query inj-event(shared_session(a,b,k_2)) ==> inj-event(a_verified(b,n)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(shared_session(a,b,k_2)) ==> inj-event(a_verified(b,n))
+goal reachable: b-inj-event(a_verified(bp[],nb_2),@occ17_2) -> inj-event(shared_session(ap[],bp[],kem_shared(nb_2)),@occ19_1)
+The hypothesis occurs strictly before the conclusion.
+Abbreviations:
+nb_2 = nb_1[siga = sign(transcript(ap[],bp[],kem_public(ask[]),zero,na[],zero),ask[]),na_1 = na[],ek_1 = kem_public(ask[]),q1 = bp[],p1 = ap[]]
+@occ19_1 = @occ19[sigb = sign(transcript(bp[],ap[],encaps(kem_public(ask[]),nb_2),kem_public(ask[]),nb_2,zero),bsk[]),nb = nb_2,ct = encaps(kem_public(ask[]),nb_2)]
+@occ17_2 = @occ17_1[sigb = sign(transcript(bp[],ap[],encaps(kem_public(ask[]),nb_2),kem_public(ask[]),nb_2,zero),bsk[]),nb = nb_2,ct = encaps(kem_public(ask[]),nb_2)]
+RESULT inj-event(shared_session(a,b,k_2)) ==> inj-event(a_verified(b,n)) is true.
+-- Query inj-event(integrity_checked(a,b,m_2)) ==> inj-event(shared_session(a,b,k_2)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(integrity_checked(a,b,m_2)) ==> inj-event(shared_session(a,b,k_2))
+goal reachable: attacker(m_2) && attacker(ad_2) && b-event(@p_act(@occ20_2[],(aead(kem_shared(nb_2),m_2,ad_2),ad_2))) && b-inj-event(shared_session(ap[],bp[],kem_shared(nb_2)),@occ19_2) -> inj-event(integrity_checked(ap[],bp[],m_2),@occ22_1)
+The 1st, 2nd hypotheses occur before the conclusion.
+The 3rd, 4th hypotheses occur strictly before the conclusion.
+Abbreviations:
+nb_2 = nb_1[siga = sign(transcript(ap[],bp[],kem_public(ask[]),zero,na[],zero),ask[]),na_1 = na[],ek_1 = kem_public(ask[]),q1 = bp[],p1 = ap[]]
+@occ22_1 = @occ22[ad = ad_2,cipher = aead(kem_shared(nb_2),m_2,ad_2),sigb = sign(transcript(bp[],ap[],encaps(kem_public(ask[]),nb_2),kem_public(ask[]),nb_2,zero),bsk[]),nb = nb_2,ct = encaps(kem_public(ask[]),nb_2)]
+@occ19_2 = @occ19_1[sigb = sign(transcript(bp[],ap[],encaps(kem_public(ask[]),nb_2),kem_public(ask[]),nb_2,zero),bsk[]),nb = nb_2,ct = encaps(kem_public(ask[]),nb_2)]
+RESULT inj-event(integrity_checked(a,b,m_2)) ==> inj-event(shared_session(a,b,k_2)) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker(secret_probe[]) is true.
+
+Query inj-event(b_verified(a,n)) ==> inj-event(a_hello(a,n)) is true.
+
+Query inj-event(a_verified(b,n2)) ==> inj-event(b_verified(a,n1)) is true.
+
+Query inj-event(shared_session(a,b,k_2)) ==> inj-event(a_verified(b,n)) is true.
+
+Query inj-event(integrity_checked(a,b,m_2)) ==> inj-event(shared_session(a,b,k_2)) is true.
+
+--------------------------------------------------------------
+
