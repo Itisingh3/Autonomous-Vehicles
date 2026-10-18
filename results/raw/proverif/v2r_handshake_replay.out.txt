@@ -1,0 +1,152 @@
+Process 0 (that is, the initial process):
+{1}new vsk: secretkey;
+{2}new rsk: secretkey;
+{3}new p: pseudonym;
+(
+    {4}let vsk_1: secretkey = vsk in
+    {5}let rsk_1: secretkey = rsk in
+    {6}let p_1: pseudonym = p in
+    {7}new nv: nonce;
+    {8}new tv: timestamp;
+    {9}let ek: bitstring = kem_public(vsk_1) in
+    {10}let h1: bitstring = transcript(p_1,ek,nv,tv,zero) in
+    {11}event vehicle_hello(p_1,nv,tv);
+    {12}out(c, (p_1,ek,nv,tv,sign(h1,vsk_1)));
+    {13}in(c, (rid: bitstring,ct: bitstring,nr: nonce,tr: timestamp,sigr: bitstring));
+    {14}let h2: bitstring = transcript(p_1,ct,nr,tr,h1) in
+    {15}if (foobar(sigr,h2,spk(rsk_1)) = ok) then
+    {16}event vehicle_verified(p_1,nr);
+    {17}let k: sessionkey = decaps(ct,vsk_1) in
+    {18}let f: bitstring = finished(k,h2) in
+    {19}out(c, (p_1,f));
+    {20}event vehicle_finished(p_1,k)
+) | (
+    {21}let rsk_2: secretkey = rsk in
+    {22}let vsk_2: secretkey = vsk in
+    {23}in(c, (p_2: pseudonym,ek_1: bitstring,nv_1: nonce,tv_1: timestamp,sigv: bitstring));
+    {24}let h1_1: bitstring = transcript(p_2,ek_1,nv_1,tv_1,zero) in
+    {25}if (foobar(sigv,h1_1,spk(vsk_2)) = ok) then
+    {26}event rsu_verified(p_2,nv_1);
+    {27}new nr_1: nonce;
+    {28}new tr_1: timestamp;
+    {29}let ct_1: bitstring = encaps(ek_1,nr_1) in
+    {30}let h2_1: bitstring = transcript(p_2,ct_1,nr_1,tr_1,h1_1) in
+    {31}event rsu_hello(p_2,nr_1,tr_1);
+    {32}out(c, (zero,ct_1,nr_1,tr_1,sign(h2_1,rsk_2)));
+    {33}in(c, (p2: pseudonym,f_1: bitstring));
+    {34}let k_1: sessionkey = kem_shared(nr_1) in
+    {35}if (p2 = p_2) then
+    {36}if (f_1 = finished(k_1,h2_1)) then
+    {37}event rsu_session(p_2,k_1);
+    {38}event v2r_session_accepted(p_2,nv_1,nr_1)
+)
+
+--  Process 1 (that is, process 0, with let moved downwards):
+{1}new vsk: secretkey;
+{2}new rsk: secretkey;
+{3}new p: pseudonym;
+(
+    {7}new nv: nonce;
+    {8}new tv: timestamp;
+    {6}let p_1: pseudonym = p in
+    {11}event vehicle_hello(p_1,nv,tv);
+    {4}let vsk_1: secretkey = vsk in
+    {9}let ek: bitstring = kem_public(vsk_1) in
+    {10}let h1: bitstring = transcript(p_1,ek,nv,tv,zero) in
+    {12}out(c, (p_1,ek,nv,tv,sign(h1,vsk_1)));
+    {13}in(c, (rid: bitstring,ct: bitstring,nr: nonce,tr: timestamp,sigr: bitstring));
+    {14}let h2: bitstring = transcript(p_1,ct,nr,tr,h1) in
+    {5}let rsk_1: secretkey = rsk in
+    {15}if (foobar(sigr,h2,spk(rsk_1)) = ok) then
+    {16}event vehicle_verified(p_1,nr);
+    {17}let k: sessionkey = decaps(ct,vsk_1) in
+    {18}let f: bitstring = finished(k,h2) in
+    {19}out(c, (p_1,f));
+    {20}event vehicle_finished(p_1,k)
+) | (
+    {23}in(c, (p_2: pseudonym,ek_1: bitstring,nv_1: nonce,tv_1: timestamp,sigv: bitstring));
+    {24}let h1_1: bitstring = transcript(p_2,ek_1,nv_1,tv_1,zero) in
+    {22}let vsk_2: secretkey = vsk in
+    {25}if (foobar(sigv,h1_1,spk(vsk_2)) = ok) then
+    {26}event rsu_verified(p_2,nv_1);
+    {27}new nr_1: nonce;
+    {28}new tr_1: timestamp;
+    {31}event rsu_hello(p_2,nr_1,tr_1);
+    {29}let ct_1: bitstring = encaps(ek_1,nr_1) in
+    {30}let h2_1: bitstring = transcript(p_2,ct_1,nr_1,tr_1,h1_1) in
+    {21}let rsk_2: secretkey = rsk in
+    {32}out(c, (zero,ct_1,nr_1,tr_1,sign(h2_1,rsk_2)));
+    {33}in(c, (p2: pseudonym,f_1: bitstring));
+    {35}if (p2 = p_2) then
+    {34}let k_1: sessionkey = kem_shared(nr_1) in
+    {36}if (f_1 = finished(k_1,h2_1)) then
+    {37}event rsu_session(p_2,k_1);
+    {38}event v2r_session_accepted(p_2,nv_1,nr_1)
+)
+
+-- Query not attacker(secret_probe[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(secret_probe[])
+RESULT not attacker(secret_probe[]) is true.
+-- Query inj-event(rsu_verified(p_3,n)) ==> inj-event(vehicle_hello(p_3,n,t)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(rsu_verified(p_3,n)) ==> inj-event(vehicle_hello(p_3,n,t))
+goal reachable: b-inj-event(vehicle_hello(p[],nv[],tv[]),@occ11[]) -> inj-event(rsu_verified(p[],nv[]),@occ26_1)
+The hypothesis occurs strictly before the conclusion.
+Abbreviations:
+@occ26_1 = @occ26[sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+RESULT inj-event(rsu_verified(p_3,n)) ==> inj-event(vehicle_hello(p_3,n,t)) is true.
+-- Query inj-event(vehicle_verified(p_3,n)) ==> inj-event(rsu_hello(p_3,n,t)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(vehicle_verified(p_3,n)) ==> inj-event(rsu_hello(p_3,n,t))
+goal reachable: attacker(rid_1) && b-inj-event(rsu_hello(p[],nr_2,tr_2),@occ31_1) -> inj-event(vehicle_verified(p[],nr_2),@occ16_1)
+The 1st hypothesis occurs before the conclusion.
+The 2nd hypothesis occurs strictly before the conclusion.
+Abbreviations:
+nr_2 = nr_1[sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+tr_2 = tr_1[sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+@occ16_1 = @occ16[sigr = sign(transcript(p[],encaps(kem_public(vsk[]),nr_2),nr_2,tr_2,transcript(p[],kem_public(vsk[]),nv[],tv[],zero)),rsk[]),tr = tr_2,nr = nr_2,ct = encaps(kem_public(vsk[]),nr_2),rid = rid_1]
+@occ31_1 = @occ31[sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+RESULT inj-event(vehicle_verified(p_3,n)) ==> inj-event(rsu_hello(p_3,n,t)) is true.
+-- Query inj-event(rsu_session(p_3,k_2)) ==> inj-event(rsu_verified(p_3,n)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(rsu_session(p_3,k_2)) ==> inj-event(rsu_verified(p_3,n))
+goal reachable: b-event(@p_act(@occ33_1[],(p[],finished(kem_shared(nr_2),transcript(p[],encaps(kem_public(vsk[]),nr_2),nr_2,tr_2,transcript(p[],kem_public(vsk[]),nv[],tv[],zero)))))) && b-inj-event(rsu_verified(p[],nv[]),@occ26_2) -> inj-event(rsu_session(p[],kem_shared(nr_2)),@occ37_1)
+The 1st, 2nd hypotheses occur strictly before the conclusion.
+Abbreviations:
+nr_2 = nr_1[sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+tr_2 = tr_1[sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+@occ37_1 = @occ37[f_1 = finished(kem_shared(nr_2),transcript(p[],encaps(kem_public(vsk[]),nr_2),nr_2,tr_2,transcript(p[],kem_public(vsk[]),nv[],tv[],zero))),p2 = p[],sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+@occ26_2 = @occ26_1[sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+RESULT inj-event(rsu_session(p_3,k_2)) ==> inj-event(rsu_verified(p_3,n)) is true.
+-- Query inj-event(v2r_session_accepted(p_3,nv_2,nr_2)) ==> inj-event(vehicle_hello(p_3,nv_2,t)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(v2r_session_accepted(p_3,nv_2,nr_2)) ==> inj-event(vehicle_hello(p_3,nv_2,t))
+goal reachable: b-inj-event(vehicle_hello(p[],nv[],tv[]),@occ11_1[]) -> inj-event(v2r_session_accepted(p[],nv[],nr_2),@occ38_1)
+The hypothesis occurs strictly before the conclusion.
+Abbreviations:
+nr_2 = nr_1[sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+tr_2 = tr_1[sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+@occ38_1 = @occ38[f_1 = finished(kem_shared(nr_2),transcript(p[],encaps(kem_public(vsk[]),nr_2),nr_2,tr_2,transcript(p[],kem_public(vsk[]),nv[],tv[],zero))),p2 = p[],sigv = sign(transcript(p[],kem_public(vsk[]),nv[],tv[],zero),vsk[]),tv_1 = tv[],nv_1 = nv[],ek_1 = kem_public(vsk[]),p_2 = p[]]
+RESULT inj-event(v2r_session_accepted(p_3,nv_2,nr_2)) ==> inj-event(vehicle_hello(p_3,nv_2,t)) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker(secret_probe[]) is true.
+
+Query inj-event(rsu_verified(p_3,n)) ==> inj-event(vehicle_hello(p_3,n,t)) is true.
+
+Query inj-event(vehicle_verified(p_3,n)) ==> inj-event(rsu_hello(p_3,n,t)) is true.
+
+Query inj-event(rsu_session(p_3,k_2)) ==> inj-event(rsu_verified(p_3,n)) is true.
+
+Query inj-event(v2r_session_accepted(p_3,nv_2,nr_2)) ==> inj-event(vehicle_hello(p_3,nv_2,t)) is true.
+
+--------------------------------------------------------------
+

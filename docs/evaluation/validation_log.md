@@ -1,28 +1,28 @@
-# Minimum validation execution log
+# Validation execution log
 
-Date: 2026-10-18
-
-## Status
+Updated: 2026-10-18
 
 | Step | Status | Evidence |
 |---|---|---|
-| Linux OMNeT++ build/campaign | BUILD/PILOT COMPLETED; MINIMUM CAMPAIGN BLOCKED | Native WSL build succeeded and a deterministic pilot completed. The acceptance gate reports only one handover transition because the current application topology has two RSUs; the required 3–5-RSU campaign is therefore not claimed. |
-| SUMO validation | COMPLETED in native WSL | `simulation/sumo/validation.sumocfg` completed with seed 42. |
-| Standalone liboqs benchmark | COMPLETED in native WSL | Six operations, 1,000 repetitions each, with ML-KEM-768 and ML-DSA-65; copied to `results/raw/crypto_benchmark.csv`. |
-| ProVerif | COMPLETED | All three Windows ProVerif 2.05 commands exited with status 0; complete outputs are under `results/raw/proverif/`. |
-| PBFT validation | COMPLETED as rule-based development validation | 240 paired rows (20 seeds × 6 scenarios × 2 modes) in `results/raw/pbft_validation.csv`. |
-| Unit-test suite | BLOCKED in current checkout | Python package directories imported by the existing tests (`protocol`, `consensus`, `ml`, `sim`, `data`) are absent from this checkout. |
+| OMNeT++ build | Completed | Five-RSU executable built in WSL with OMNeT++ 6.0.1. |
+| Replicated handover campaign | Completed | 24 configurations, 20 valid paired seeds each; 1,920 successful transition records. |
+| Five-RSU coverage | Completed | Every valid seed records transitions 1–4: rsu-001 to rsu-002, rsu-002 to rsu-003, rsu-003 to rsu-004, rsu-004 to rsu-005. |
+| Handover outcome | Completed for valid runs | Success 100%; fallback 0%. |
+| SUMO/Veins realism | Limited | The campaign uses the deterministic application validation topology; it is not real instrumented CAV traffic. |
+| liboqs benchmark | Separate evidence | Use results/raw/crypto_benchmark.csv; campaign-level per-operation timings are NOT FOUND. |
+| ProVerif | Completed separately | Existing model outputs and verification table remain symbolic evidence only. |
+| PBFT | Development-model evidence | No complete PBFT liveness validation is claimed. |
 
-## ProVerif outputs
+## Campaign command
 
-- `results/raw/proverif/v2r_handshake.out.txt`
-- `results/raw/proverif/handover_token.out.txt`
-- `results/raw/proverif/v2v_session.out.txt`
-- `results/raw/proverif/verification_table.csv`
+```powershell
+wsl.exe -d opp_env -- bash -lc "cd /home/opp_env/cav-pqc-framework && ./simulation/omnetpp/run_handover_campaign.sh --seeds 20 --speeds 30,50,80 --densities 50,100,200,300 --spacings 250,400 --min-rsus 3"
+```
 
-## PBFT outputs
+## Campaign result
 
-- `results/raw/pbft_validation.csv`
-- `results/summary/pbft_validation_summary.csv`
+The campaign reports mean full V2R latency 18.3848 ms, mean handover-token latency 5.0413 ms, and mean descriptive reduction 72.5788%. The reduction range is 72.2861%–72.6136%; the descriptive 95% CI half-width is ±0.0311 percentage points. No statistical-significance test was run.
 
-These PBFT outputs are not network-simulator measurements and must not be merged into the final evidence summary until the required 3–5-RSU OMNeT++/Veins/SUMO campaign passes. The independent crypto benchmark has completed successfully.
+## Remaining limitations
+
+Message overhead, packet delivery ratio, throughput, and campaign-level ML-KEM/ML-DSA operation timings are blank in the raw CSV and are not claimed. The configured speed and density labels do not produce differentiated network behavior in this deterministic application. There is no real-world CAV trace validation, no side-channel analysis, and no complete PBFT liveness experiment.

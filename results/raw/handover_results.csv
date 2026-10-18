@@ -1,2 +1,5 @@
-run,full_handshake_latency_s,handover_latency_s,handover_success,fallback_used
-0,0.0183647,0.00503833,1,0
+run,full_handshake_latency_s,handover_latency_s,handover_success,fallback_used,transition_index,source_rsu,destination_rsu,simulated_network_time_s
+0,0.0183972,0.00527933,1,0,1,rsu-001,rsu-002,1.02428
+0,0.0183972,0.00503833,1,0,2,rsu-002,rsu-003,1.02994
+0,0.0183972,0.00503833,1,0,3,rsu-003,rsu-004,1.03563
+0,0.0183972,0.00503833,1,0,4,rsu-004,rsu-005,1.04129

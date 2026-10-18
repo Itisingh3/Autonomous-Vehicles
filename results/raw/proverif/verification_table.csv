@@ -1,4 +1,17 @@
-model,queries,result,output_file,execution_environment
-v2r_handshake,4/4,true,results/raw/proverif/v2r_handshake.out.txt,Windows ProVerif 2.05
-handover_token,4/4,true,results/raw/proverif/handover_token.out.txt,Windows ProVerif 2.05
-v2v_session,5/5,true,results/raw/proverif/v2v_session.out.txt,Windows ProVerif 2.05
+model_name,query_name,query_type,security_property,actual_result,proverif_version,symbolic_assumptions,evidence_output_file
+v2r_handshake,secret_probe,secrecy,session-key secrecy,true,2.05,"Dolev-Yao; ideal ML-KEM/ML-DSA; fresh nonces/timestamps",results/raw/proverif/v2r_handshake_replay.out.txt
+v2r_handshake,rsu_verified_correspondence,injective-correspondence,mutual authentication,true,2.05,"Dolev-Yao; registered verification keys; freshness checks",results/raw/proverif/v2r_handshake_replay.out.txt
+v2r_handshake,vehicle_verified_correspondence,injective-correspondence,mutual authentication,true,2.05,"Dolev-Yao; registered verification keys; freshness checks",results/raw/proverif/v2r_handshake_replay.out.txt
+v2r_handshake,rsu_session_correspondence,injective-correspondence,session establishment authentication,true,2.05,"Dolev-Yao; ideal key derivation; fresh nonces",results/raw/proverif/v2r_handshake_replay.out.txt
+v2r_handshake,v2r_session_accepted_replay,injective-correspondence,replay resistance,true,2.05,"Dolev-Yao; fresh vehicle/RSU nonces and timestamps",results/raw/proverif/v2r_handshake_replay.out.txt
+handover_token,secret_probe,secrecy,handover-session secrecy,true,2.05,"Dolev-Yao; protected RSU channel; ideal ML-DSA; expiry/one-time checks",results/raw/proverif/handover_token_replay.out.txt
+handover_token,next_rsu_verified_correspondence,injective-correspondence,token origin authentication,true,2.05,"Registered RSUs; protected RSU channel; Dolev-Yao",results/raw/proverif/handover_token_replay.out.txt
+handover_token,vehicle_handover_verified_correspondence,injective-correspondence,vehicle handover authentication,true,2.05,"Fresh vehicle nonce; registered signing key",results/raw/proverif/handover_token_replay.out.txt
+handover_token,handover_session_correspondence,injective-correspondence,handover session authentication,true,2.05,"Fresh handover nonces; modeled key derivation",results/raw/proverif/handover_token_replay.out.txt
+handover_token,handover_token_accepted_replay,injective-correspondence,one-time token replay resistance,true,2.05,"Fresh token nonce; expiry; destination binding; one-time use",results/raw/proverif/handover_token_replay.out.txt
+v2v_session,secret_probe,secrecy,V2V session-key secrecy,true,2.05,"Dolev-Yao; ideal ML-KEM/ML-DSA; fresh transcript nonces",results/raw/proverif/v2v_session_replay.out.txt
+v2v_session,b_verified_correspondence,injective-correspondence,V2V mutual authentication,true,2.05,"Registered pseudonym keys; fresh nonce",results/raw/proverif/v2v_session_replay.out.txt
+v2v_session,a_verified_correspondence,injective-correspondence,V2V mutual authentication,true,2.05,"Registered pseudonym keys; fresh nonce",results/raw/proverif/v2v_session_replay.out.txt
+v2v_session,shared_session_correspondence,injective-correspondence,V2V session establishment,true,2.05,"Fresh encapsulation nonce; ideal ML-KEM",results/raw/proverif/v2v_session_replay.out.txt
+v2v_session,integrity_checked_correspondence,injective-correspondence,V2V message integrity,true,2.05,"AEAD abstraction; associated data binding",results/raw/proverif/v2v_session_replay.out.txt
+v2v_session,v2v_session_accepted_replay,injective-correspondence,V2V transcript replay resistance,true,2.05,"Fresh initiator/responder nonces; transcript binding",results/raw/proverif/v2v_session_replay.out.txt

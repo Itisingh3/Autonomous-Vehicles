@@ -12,6 +12,7 @@ simple CAVApp extends DemoBaseApplLayer {
         string pseudonym = default("cav-001");
         string targetRsu = default("rsu-001");
         string nextRsu = default("rsu-002");
+        int numRsus = default(5);
         double startAt @unit(s) = default(1s);
         double maxClockSkew @unit(s) = default(200ms);
         string kemAlgorithm = default("ML-KEM-768");
@@ -35,7 +36,7 @@ simple RSUApp extends DemoBaseApplLayer {
 
 network CavPqcNetwork extends Scenario {
     submodules:
-        rsu[2]: RSU {
+        rsu[5]: RSU {
             parameters:
                 applType = "RSUApp";
                 appl.rsuId = "rsu-001";
@@ -52,14 +53,14 @@ network CavPqcUnitNetwork {
     submodules:
         world: BaseWorldUtility {
             parameters:
-                playgroundSizeX = 1000m;
+                playgroundSizeX = 1500m;
                 playgroundSizeY = 1000m;
                 playgroundSizeZ = 50m;
         }
         connectionManager: ConnectionManager {
             parameters:
                 sendDirect = true;
-                maxInterfDist = 1000m;
+                maxInterfDist = 1600m;
         }
         obstacles: ObstacleControl {
         }
@@ -75,7 +76,7 @@ network CavPqcUnitNetwork {
                 veinsmobility.acceleration = 0mpss;
                 veinsmobility.updateInterval = 1s;
         }
-        rsu[2]: RSU {
+        rsu[5]: RSU {
             parameters:
                 applType = "RSUApp";
                 mobility.x = 150;

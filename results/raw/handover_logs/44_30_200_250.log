@@ -1,0 +1,64 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2022 Andras Varga, OpenSim Ltd.
+Version: 6.0.1, build: 220831-e4f07d04b8, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+
+Setting up Cmdenv...
+
+Loading NED files from .:  1
+Loading NED files from ../.neddeps:  43
+Loading NED files from /home/opp_env/veins/src:  43
+
+Preparing for running configuration General, run #0...
+Scenario: $vehicleSpeed=30, $rsuSpacing=250, $repetition=0
+Assigned runID=General-0-20261018-11:46:44-3957
+Setting up network "CavPqcUnitNetwork"...
+Initializing...
+
+Running simulation...
+** Event #0   t=0   Elapsed: 1e-05s (0m 00s)  0% completed  (0% total)
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 85   present: 85   in FES: 8
+TRACE A/G/H/I t=1.018093001142 vehicle=cav-001 source=rsu-001 destination=rsu-002 transition=1 context/session-pending
+TRACE I/K t=1.018675001142 vehicle=cav-001 source=rsu-001 destination=rsu-002 token=7a3325e40336745f3ead5d7b942f3ffe context=12ed24965c239317c7336e3975a6ba85b3ff344b3553d1f0759de82dc1c9f807
+TRACE B t=1.018992167999 vehicle=cav-001 source=rsu-001 destination=rsu-002 transition=1 token=7a3325e40336745f3ead5d7b942f3ffe context=12ed24965c239317c7336e3975a6ba85b3ff344b3553d1f0759de82dc1c9f807
+TRACE J t=1.018992167999 vehicle=cav-001 source=rsu-001 destination=rsu-002 transition=1 token=7a3325e40336745f3ead5d7b942f3ffe context=12ed24965c239317c7336e3975a6ba85b3ff344b3553d1f0759de82dc1c9f807
+TRACE K/J t=1.023739334856 vehicle=cav-001 source=rsu-001 destination=rsu-002 token=c78750f02c35e5a87cbdaac669feaa8ef7a23a93f81a655adde7abf047f16d7a context=12ed24965c239317c7336e3975a6ba85b3ff344b3553d1f0759de82dc1c9f807
+TRACE L/M/N/O success t=1.023739334856 vehicle=cav-001 source=rsu-002 destination=rsu-002 token=c78750f02c35e5a87cbdaac669feaa8ef7a23a93f81a655adde7abf047f16d7a session=e4e94d56ecdd1f87452f257c9e0c947c369a21a9d541c102175cd8b40c45c398
+TRACE A/G/H/I t=1.023739334856 vehicle=cav-001 source=rsu-002 destination=rsu-003 transition=2 context/session-pending
+TRACE C t=1.024030501713 vehicle=cav-001 source=rsu-001 destination=rsu-002 transition=1 session=c5daaac6a4166360543fc2428a8eda2ddc0136146d7b5f98ed79493f709e07a1
+TRACE D/E/N/O success t=1.024030501713 vehicle=cav-001 source=rsu-001 destination=rsu-002 transition=1 session=e4e94d56ecdd1f87452f257c9e0c947c369a21a9d541c102175cd8b40c45c398
+TRACE E/F/G t=1.024030501713 vehicle=cav-001 source=rsu-002 destination=rsu-003 transition=2 context=12ed24965c239317c7336e3975a6ba85b3ff344b3553d1f0759de82dc1c9f807
+TRACE I/K t=1.024347334856 vehicle=cav-001 source=rsu-002 destination=rsu-003 token=53cd9a0d6b00fa72cdfab10fcb8616ef context=6687e0d320394fd255f02a69943bb220e0015d371b9a26df7bf2a447dda0c2e4
+TRACE B t=1.024638501713 vehicle=cav-001 source=rsu-002 destination=rsu-003 transition=2 token=53cd9a0d6b00fa72cdfab10fcb8616ef context=6687e0d320394fd255f02a69943bb220e0015d371b9a26df7bf2a447dda0c2e4
+TRACE J t=1.024638501713 vehicle=cav-001 source=rsu-002 destination=rsu-003 transition=2 token=53cd9a0d6b00fa72cdfab10fcb8616ef context=6687e0d320394fd255f02a69943bb220e0015d371b9a26df7bf2a447dda0c2e4
+TRACE K/J t=1.02938566857 vehicle=cav-001 source=rsu-002 destination=rsu-003 token=fb5eb8efbd56ad66db59a0e11ecbf1c872e7897e22df60db0bea914fd1ad8c58 context=6687e0d320394fd255f02a69943bb220e0015d371b9a26df7bf2a447dda0c2e4
+TRACE L/M/N/O success t=1.02938566857 vehicle=cav-001 source=rsu-003 destination=rsu-003 token=fb5eb8efbd56ad66db59a0e11ecbf1c872e7897e22df60db0bea914fd1ad8c58 session=ff0d60aa6a7150e47bb4a76fa00cd4f07d6ad3888b8b8cb01d57f750d1d851a9
+TRACE A/G/H/I t=1.02938566857 vehicle=cav-001 source=rsu-003 destination=rsu-004 transition=2 context/session-pending
+TRACE C t=1.029676835427 vehicle=cav-001 source=rsu-002 destination=rsu-003 transition=2 session=e4e94d56ecdd1f87452f257c9e0c947c369a21a9d541c102175cd8b40c45c398
+TRACE D/E/N/O success t=1.029676835427 vehicle=cav-001 source=rsu-002 destination=rsu-003 transition=2 session=ff0d60aa6a7150e47bb4a76fa00cd4f07d6ad3888b8b8cb01d57f750d1d851a9
+TRACE E/F/G t=1.029676835427 vehicle=cav-001 source=rsu-003 destination=rsu-004 transition=3 context=6687e0d320394fd255f02a69943bb220e0015d371b9a26df7bf2a447dda0c2e4
+TRACE I/K t=1.02998066857 vehicle=cav-001 source=rsu-003 destination=rsu-004 token=7bec31f7551b89f01a8b44ce25cb4d4e context=b64aff76cd73e145478f74a4e9b95b4050c3efa30ec5f3932ab119d1ecf3aa71
+TRACE B t=1.030271835427 vehicle=cav-001 source=rsu-003 destination=rsu-004 transition=3 token=7bec31f7551b89f01a8b44ce25cb4d4e context=b64aff76cd73e145478f74a4e9b95b4050c3efa30ec5f3932ab119d1ecf3aa71
+TRACE J t=1.030271835427 vehicle=cav-001 source=rsu-003 destination=rsu-004 transition=3 token=7bec31f7551b89f01a8b44ce25cb4d4e context=b64aff76cd73e145478f74a4e9b95b4050c3efa30ec5f3932ab119d1ecf3aa71
+TRACE K/J t=1.035019002284 vehicle=cav-001 source=rsu-003 destination=rsu-004 token=a7827c20f68e6fff5298bb8858865d9ebb02784fd124e628de0d6b9154127df1 context=b64aff76cd73e145478f74a4e9b95b4050c3efa30ec5f3932ab119d1ecf3aa71
+TRACE L/M/N/O success t=1.035019002284 vehicle=cav-001 source=rsu-004 destination=rsu-004 token=a7827c20f68e6fff5298bb8858865d9ebb02784fd124e628de0d6b9154127df1 session=eb7da1827b396acfa19e7bf53514bfd22d22c9fa5a93128c3ee8c1910b6ea5a8
+TRACE A/G/H/I t=1.035019002284 vehicle=cav-001 source=rsu-004 destination=rsu-005 transition=2 context/session-pending
+TRACE C t=1.035310169141 vehicle=cav-001 source=rsu-003 destination=rsu-004 transition=3 session=ff0d60aa6a7150e47bb4a76fa00cd4f07d6ad3888b8b8cb01d57f750d1d851a9
+TRACE D/E/N/O success t=1.035310169141 vehicle=cav-001 source=rsu-003 destination=rsu-004 transition=3 session=eb7da1827b396acfa19e7bf53514bfd22d22c9fa5a93128c3ee8c1910b6ea5a8
+TRACE E/F/G t=1.035310169141 vehicle=cav-001 source=rsu-004 destination=rsu-005 transition=4 context=b64aff76cd73e145478f74a4e9b95b4050c3efa30ec5f3932ab119d1ecf3aa71
+TRACE I/K t=1.035601002284 vehicle=cav-001 source=rsu-004 destination=rsu-005 token=3a86c1504d4e77c9dc6c7d9c519d1f3e context=07c31ca786738877b5c847b1732d218c160f1df95cbdf366fa2dcb8c21376978
+TRACE B t=1.035931169141 vehicle=cav-001 source=rsu-004 destination=rsu-005 transition=4 token=3a86c1504d4e77c9dc6c7d9c519d1f3e context=07c31ca786738877b5c847b1732d218c160f1df95cbdf366fa2dcb8c21376978
+TRACE J t=1.035931169141 vehicle=cav-001 source=rsu-004 destination=rsu-005 transition=4 token=3a86c1504d4e77c9dc6c7d9c519d1f3e context=07c31ca786738877b5c847b1732d218c160f1df95cbdf366fa2dcb8c21376978
+TRACE K/J t=1.040678335998 vehicle=cav-001 source=rsu-004 destination=rsu-005 token=d546e4aed1dc5604e19188a0ad0799d62f624460fa827631b552733a148988e8 context=07c31ca786738877b5c847b1732d218c160f1df95cbdf366fa2dcb8c21376978
+TRACE L/M/N/O success t=1.040678335998 vehicle=cav-001 source=rsu-005 destination=rsu-005 token=d546e4aed1dc5604e19188a0ad0799d62f624460fa827631b552733a148988e8 session=6ecc6600568b14c608eead06ab0a93e8eb28e58d8520852704726f11fec948df
+TRACE C t=1.040969502855 vehicle=cav-001 source=rsu-004 destination=rsu-005 transition=4 session=eb7da1827b396acfa19e7bf53514bfd22d22c9fa5a93128c3ee8c1910b6ea5a8
+TRACE D/E/N/O success t=1.040969502855 vehicle=cav-001 source=rsu-004 destination=rsu-005 transition=4 session=6ecc6600568b14c608eead06ab0a93e8eb28e58d8520852704726f11fec948df
+** Event #7782   t=30   Elapsed: 0.013832s (0m 00s)  100% completed  (100% total)
+     Speed:     ev/sec=562893   simsec/sec=2167.13   ev/simsec=259.741
+     Messages:  created: 6685   present: 97   in FES: 6
+
+<!> Simulation time limit reached -- at t=30s, event #7782
+
+Calling finish() at end of Run #0...
+
+End.

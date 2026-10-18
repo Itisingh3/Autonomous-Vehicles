@@ -24,11 +24,15 @@ fun finished(sessionkey,bitstring): bitstring.
 event vehicle_hello(pseudonym, nonce, timestamp). event rsu_hello(pseudonym, nonce, timestamp).
 event vehicle_verified(pseudonym, nonce). event rsu_verified(pseudonym, nonce).
 event vehicle_finished(pseudonym, sessionkey). event rsu_session(pseudonym, sessionkey).
+(* Replay-resistance events: acceptance is injectively bound to a fresh transcript. *)
+event v2r_session_accepted(pseudonym, nonce, nonce).
+event v2r_replay_rejected(pseudonym, nonce, nonce).
 
 query attacker(secret_probe).
 query p:pseudonym,n:nonce,t:timestamp; inj-event(rsu_verified(p,n)) ==> inj-event(vehicle_hello(p,n,t)).
 query p:pseudonym,n:nonce,t:timestamp; inj-event(vehicle_verified(p,n)) ==> inj-event(rsu_hello(p,n,t)).
 query p:pseudonym,k:sessionkey,n:nonce; inj-event(rsu_session(p,k)) ==> inj-event(rsu_verified(p,n)).
+query p:pseudonym,nv:nonce,nr:nonce,t:timestamp; inj-event(v2r_session_accepted(p,nv,nr)) ==> inj-event(vehicle_hello(p,nv,t)).
 
 let vehicle(vsk:secretkey, rsk:secretkey, p:pseudonym) =
   new nv:nonce; new tv:timestamp; let ek=kem_public(vsk) in
@@ -46,7 +50,7 @@ let rsu(rsk:secretkey, vsk:secretkey) =
     let ct=encaps(ek,nr) in let h2=transcript(p,ct,nr,tr,h1) in
     event rsu_hello(p,nr,tr); out(c,(zero(),ct,nr,tr,sign(h2,rsk)));
     in(c,(p2:pseudonym,f:bitstring)); let k=kem_shared(nr) in
-    if p2=p then if f=finished(k,h2) then event rsu_session(p,k).
+    if p2=p then if f=finished(k,h2) then event rsu_session(p,k); event v2r_session_accepted(p,nv,nr).
 
 process new vsk:secretkey; new rsk:secretkey; new p:pseudonym;
   ((vehicle(vsk,rsk,p)) | (rsu(rsk,vsk)))

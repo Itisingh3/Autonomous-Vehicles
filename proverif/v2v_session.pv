@@ -22,19 +22,23 @@ reduc forall k:sessionkey,m:bitstring,ad:bitstring; open(k,aead(k,m,ad),ad)=m.
 
 event a_hello(pseudonym,nonce). event b_verified(pseudonym,nonce). event a_verified(pseudonym,nonce).
 event shared_session(pseudonym,pseudonym,sessionkey). event integrity_checked(pseudonym,pseudonym,bitstring).
+(* Replay-resistance events: accepted sessions require fresh transcript nonces. *)
+event v2v_session_accepted(pseudonym,pseudonym,nonce,nonce).
+event v2v_replay_rejected(pseudonym,pseudonym).
 
 query attacker(secret_probe).
 query a,b:pseudonym,n:nonce; inj-event(b_verified(a,n)) ==> inj-event(a_hello(a,n)).
 query a,b:pseudonym,n1:nonce,n2:nonce; inj-event(a_verified(b,n2)) ==> inj-event(b_verified(a,n1)).
 query a,b:pseudonym,k:sessionkey,n:nonce; inj-event(shared_session(a,b,k)) ==> inj-event(a_verified(b,n)).
 query a,b:pseudonym,m:bitstring,k:sessionkey; inj-event(integrity_checked(a,b,m)) ==> inj-event(shared_session(a,b,k)).
+query a,b:pseudonym,na:nonce,nb:nonce; inj-event(v2v_session_accepted(a,b,na,nb)) ==> inj-event(a_hello(a,na)).
 
 let initiator(ask:secretkey,bsk:secretkey,p:pseudonym,q:pseudonym) =
   new na:nonce; let ek=kem_public(ask) in let h1=transcript(p,q,ek,zero(),na,zero()) in
   event a_hello(p,na); out(c,(p,q,ek,na,sign(h1,ask)));
   in(c,(ct:bitstring,nb:nonce,sigb:bitstring)); let h2=transcript(q,p,ct,ek,nb,zero()) in
   if foobar(sigb,h2,spk(bsk)) = ok() then event a_verified(q,nb);
-    let k=decaps(ct,ask) in event shared_session(p,q,k);
+    let k=decaps(ct,ask) in event shared_session(p,q,k); event v2v_session_accepted(p,q,na,nb);
     in(c,(cipher:bitstring,ad:bitstring)); let m=open(k,cipher,ad) in event integrity_checked(p,q,m).
 
 let responder(bsk:secretkey,ask:secretkey,p:pseudonym,q:pseudonym) =

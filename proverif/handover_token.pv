@@ -24,11 +24,15 @@ fun handover_key(contextkey,nonce,nonce,timestamp):sessionkey.
 event token_issued(pseudonym,nonce,timestamp). event token_received(pseudonym,nonce,timestamp).
 event vehicle_handover_verified(pseudonym,nonce). event next_rsu_verified(pseudonym,nonce).
 event handover_session(pseudonym,sessionkey).
+(* Replay-resistance events: token use is injective and bound to destination/fresh nonce. *)
+event handover_token_accepted(pseudonym,nonce,bitstring).
+event handover_replay_rejected(pseudonym,nonce).
 
 query attacker(secret_probe).
 query p:pseudonym,n:nonce,ex:timestamp; inj-event(next_rsu_verified(p,n)) ==> inj-event(token_issued(p,n,ex)).
 query p:pseudonym,nv:nonce,ho:nonce,ex:timestamp; inj-event(vehicle_handover_verified(p,nv)) ==> inj-event(token_received(p,ho,ex)).
 query p:pseudonym,k:sessionkey,n:nonce; inj-event(handover_session(p,k)) ==> inj-event(vehicle_handover_verified(p,n)).
+query p:pseudonym,n:nonce,d:bitstring,ex:timestamp; inj-event(handover_token_accepted(p,n,d)) ==> inj-event(token_received(p,n,ex)).
 
 let current_rsu(ask:secretkey,p:pseudonym,old:sessionkey,next:bitstring) =
   new ho:nonce; new issued:timestamp; new expiry:timestamp; let ctx=kdf(old,zero()) in
@@ -50,7 +54,7 @@ let next_rsu(bsk:secretkey,ask:secretkey,vsk:secretkey) =
     in(c,(p3:pseudonym,next3:bitstring,ho3:nonce,nv:nonce,sigv:bitstring));
     if p3=p then if next3=next then
       if foobar(sigv,token(p3,next3,ctx,issued,expiry,nv),spk(vsk)) = ok() then
-        event next_rsu_verified(p3,nv); new nr:nonce; out(c,nr); out(c,zero()).
+        event next_rsu_verified(p3,nv); event handover_token_accepted(p3,ho,next3); new nr:nonce; out(c,nr); out(c,zero()).
 
 process new ask:secretkey; new bsk:secretkey; new vsk:secretkey; new p:pseudonym; new old:sessionkey;
   ((current_rsu(ask,p,old,kem_public(bsk))) | (vehicle(vsk,ask,p,old)) | (next_rsu(bsk,ask,vsk)))

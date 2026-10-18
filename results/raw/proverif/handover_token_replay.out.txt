@@ -1,0 +1,164 @@
+Process 0 (that is, the initial process):
+{1}new ask: secretkey;
+{2}new bsk: secretkey;
+{3}new vsk: secretkey;
+{4}new p: pseudonym;
+{5}new old: sessionkey;
+(
+    {6}let ask_1: secretkey = ask in
+    {7}let p_1: pseudonym = p in
+    {8}let old_1: sessionkey = old in
+    {9}let next: bitstring = kem_public(bsk) in
+    {10}new ho: nonce;
+    {11}new issued: timestamp;
+    {12}new expiry: timestamp;
+    {13}let ctx: contextkey = kdf(old_1,zero) in
+    {14}let tk: bitstring = token(p_1,next,ctx,issued,expiry,ho) in
+    {15}event token_issued(p_1,ho,expiry);
+    {16}out(c, (p_1,next,issued,expiry,ho,sign(tk,ask_1),aead(rsu_channel,ctx,zero)));
+    {17}in(c, ack: bitstring)
+) | (
+    {18}let vsk_1: secretkey = vsk in
+    {19}let source: secretkey = ask in
+    {20}let p_2: pseudonym = p in
+    {21}let old_2: sessionkey = old in
+    {22}in(c, (p2: pseudonym,next_1: bitstring,issued_1: timestamp,expiry_1: timestamp,ho_1: nonce,ts: bitstring,enc: bitstring));
+    {23}let ctx_1: contextkey = kdf(old_2,zero) in
+    {24}let tk_1: bitstring = token(p2,next_1,ctx_1,issued_1,expiry_1,ho_1) in
+    {25}if (foobar(ts,tk_1,spk(source)) = ok) then
+    {26}event token_received(p2,ho_1,expiry_1);
+    {27}new nv: nonce;
+    {28}new now: timestamp;
+    {29}let req: bitstring = token(p2,next_1,ctx_1,now,expiry_1,nv) in
+    {30}out(c, (p2,next_1,ho_1,nv,sign(req,vsk_1)));
+    {31}event vehicle_handover_verified(p2,nv);
+    {32}in(c, nr: nonce);
+    {33}let k: sessionkey = handover_key(ctx_1,nv,nr,now) in
+    {34}event handover_session(p2,k)
+) | (
+    {35}let bsk_1: secretkey = bsk in
+    {36}let ask_2: secretkey = ask in
+    {37}let vsk_2: secretkey = vsk in
+    {38}in(c, (p_3: pseudonym,next_2: bitstring,issued_2: timestamp,expiry_2: timestamp,ho_2: nonce,ts_1: bitstring,enc_1: bitstring));
+    {39}let ctx_2: contextkey = open(rsu_channel,enc_1,zero) in
+    {40}if (foobar(ts_1,token(p_3,next_2,ctx_2,issued_2,expiry_2,ho_2),spk(ask_2)) = ok) then
+    {41}in(c, (p3: pseudonym,next3: bitstring,ho3: nonce,nv_1: nonce,sigv: bitstring));
+    {42}if (p3 = p_3) then
+    {43}if (next3 = next_2) then
+    {44}if (foobar(sigv,token(p3,next3,ctx_2,issued_2,expiry_2,nv_1),spk(vsk_2)) = ok) then
+    {45}event next_rsu_verified(p3,nv_1);
+    {46}event handover_token_accepted(p3,ho_2,next3);
+    {47}new nr_1: nonce;
+    {48}out(c, nr_1);
+    {49}out(c, zero)
+)
+
+--  Process 1 (that is, process 0, with let moved downwards):
+{1}new ask: secretkey;
+{2}new bsk: secretkey;
+{3}new vsk: secretkey;
+{4}new p: pseudonym;
+{5}new old: sessionkey;
+(
+    {10}new ho: nonce;
+    {11}new issued: timestamp;
+    {12}new expiry: timestamp;
+    {7}let p_1: pseudonym = p in
+    {15}event token_issued(p_1,ho,expiry);
+    {8}let old_1: sessionkey = old in
+    {13}let ctx: contextkey = kdf(old_1,zero) in
+    {9}let next: bitstring = kem_public(bsk) in
+    {14}let tk: bitstring = token(p_1,next,ctx,issued,expiry,ho) in
+    {6}let ask_1: secretkey = ask in
+    {16}out(c, (p_1,next,issued,expiry,ho,sign(tk,ask_1),aead(rsu_channel,ctx,zero)));
+    {17}in(c, ack: bitstring)
+) | (
+    {22}in(c, (p2: pseudonym,next_1: bitstring,issued_1: timestamp,expiry_1: timestamp,ho_1: nonce,ts: bitstring,enc: bitstring));
+    {21}let old_2: sessionkey = old in
+    {23}let ctx_1: contextkey = kdf(old_2,zero) in
+    {24}let tk_1: bitstring = token(p2,next_1,ctx_1,issued_1,expiry_1,ho_1) in
+    {19}let source: secretkey = ask in
+    {25}if (foobar(ts,tk_1,spk(source)) = ok) then
+    {26}event token_received(p2,ho_1,expiry_1);
+    {27}new nv: nonce;
+    {28}new now: timestamp;
+    {29}let req: bitstring = token(p2,next_1,ctx_1,now,expiry_1,nv) in
+    {18}let vsk_1: secretkey = vsk in
+    {30}out(c, (p2,next_1,ho_1,nv,sign(req,vsk_1)));
+    {31}event vehicle_handover_verified(p2,nv);
+    {32}in(c, nr: nonce);
+    {33}let k: sessionkey = handover_key(ctx_1,nv,nr,now) in
+    {34}event handover_session(p2,k)
+) | (
+    {38}in(c, (p_3: pseudonym,next_2: bitstring,issued_2: timestamp,expiry_2: timestamp,ho_2: nonce,ts_1: bitstring,enc_1: bitstring));
+    {39}let ctx_2: contextkey = open(rsu_channel,enc_1,zero) in
+    {36}let ask_2: secretkey = ask in
+    {40}if (foobar(ts_1,token(p_3,next_2,ctx_2,issued_2,expiry_2,ho_2),spk(ask_2)) = ok) then
+    {41}in(c, (p3: pseudonym,next3: bitstring,ho3: nonce,nv_1: nonce,sigv: bitstring));
+    {42}if (p3 = p_3) then
+    {43}if (next3 = next_2) then
+    {37}let vsk_2: secretkey = vsk in
+    {44}if (foobar(sigv,token(p3,next3,ctx_2,issued_2,expiry_2,nv_1),spk(vsk_2)) = ok) then
+    {45}event next_rsu_verified(p3,nv_1);
+    {46}event handover_token_accepted(p3,ho_2,next3);
+    {47}new nr_1: nonce;
+    {48}out(c, nr_1);
+    {49}out(c, zero)
+)
+
+-- Query not attacker(secret_probe[]) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query not attacker(secret_probe[])
+RESULT not attacker(secret_probe[]) is true.
+-- Query inj-event(next_rsu_verified(p_4,n)) ==> inj-event(token_issued(p_4,n,ex)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(next_rsu_verified(p_4,n)) ==> inj-event(token_issued(p_4,n,ex))
+RESULT inj-event(next_rsu_verified(p_4,n)) ==> inj-event(token_issued(p_4,n,ex)) is true.
+-- Query inj-event(vehicle_handover_verified(p_4,nv_2)) ==> inj-event(token_received(p_4,ho_3,ex)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(vehicle_handover_verified(p_4,nv_2)) ==> inj-event(token_received(p_4,ho_3,ex))
+goal reachable: b-inj-event(token_received(p[],ho[],expiry[]),@occ26_1) && attacker(enc_2) -> inj-event(vehicle_handover_verified(p[],nv_2),@occ31_1)
+The 1st hypothesis occurs strictly before the conclusion.
+The 2nd hypothesis occurs before the conclusion.
+Abbreviations:
+nv_2 = nv[enc = enc_2,ts = sign(token(p[],kem_public(bsk[]),kdf(old[],zero),issued[],expiry[],ho[]),ask[]),ho_1 = ho[],expiry_1 = expiry[],issued_1 = issued[],next_1 = kem_public(bsk[]),p2 = p[]]
+@occ31_1 = @occ31[enc = enc_2,ts = sign(token(p[],kem_public(bsk[]),kdf(old[],zero),issued[],expiry[],ho[]),ask[]),ho_1 = ho[],expiry_1 = expiry[],issued_1 = issued[],next_1 = kem_public(bsk[]),p2 = p[]]
+@occ26_1 = @occ26[enc = enc_2,ts = sign(token(p[],kem_public(bsk[]),kdf(old[],zero),issued[],expiry[],ho[]),ask[]),ho_1 = ho[],expiry_1 = expiry[],issued_1 = issued[],next_1 = kem_public(bsk[]),p2 = p[]]
+RESULT inj-event(vehicle_handover_verified(p_4,nv_2)) ==> inj-event(token_received(p_4,ho_3,ex)) is true.
+-- Query inj-event(handover_session(p_4,k_1)) ==> inj-event(vehicle_handover_verified(p_4,n)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(handover_session(p_4,k_1)) ==> inj-event(vehicle_handover_verified(p_4,n))
+goal reachable: attacker(nr_2) && b-event(@p_act(@occ32_1[],nr_2)) && b-inj-event(vehicle_handover_verified(p[],nv_2),@occ31_2) && attacker(enc_2) -> inj-event(handover_session(p[],handover_key(kdf(old[],zero),nv_2,nr_2,now_1)),@occ34_1)
+The 1st, 4th hypotheses occur before the conclusion.
+The 2nd, 3rd hypotheses occur strictly before the conclusion.
+Abbreviations:
+nv_2 = nv[enc = enc_2,ts = sign(token(p[],kem_public(bsk[]),kdf(old[],zero),issued[],expiry[],ho[]),ask[]),ho_1 = ho[],expiry_1 = expiry[],issued_1 = issued[],next_1 = kem_public(bsk[]),p2 = p[]]
+now_1 = now[enc = enc_2,ts = sign(token(p[],kem_public(bsk[]),kdf(old[],zero),issued[],expiry[],ho[]),ask[]),ho_1 = ho[],expiry_1 = expiry[],issued_1 = issued[],next_1 = kem_public(bsk[]),p2 = p[]]
+@occ34_1 = @occ34[nr = nr_2,enc = enc_2,ts = sign(token(p[],kem_public(bsk[]),kdf(old[],zero),issued[],expiry[],ho[]),ask[]),ho_1 = ho[],expiry_1 = expiry[],issued_1 = issued[],next_1 = kem_public(bsk[]),p2 = p[]]
+@occ31_2 = @occ31_1[enc = enc_2,ts = sign(token(p[],kem_public(bsk[]),kdf(old[],zero),issued[],expiry[],ho[]),ask[]),ho_1 = ho[],expiry_1 = expiry[],issued_1 = issued[],next_1 = kem_public(bsk[]),p2 = p[]]
+RESULT inj-event(handover_session(p_4,k_1)) ==> inj-event(vehicle_handover_verified(p_4,n)) is true.
+-- Query inj-event(handover_token_accepted(p_4,n,d)) ==> inj-event(token_received(p_4,n,ex)) in process 1.
+Translating the process into Horn clauses...
+Completing...
+Starting query inj-event(handover_token_accepted(p_4,n,d)) ==> inj-event(token_received(p_4,n,ex))
+RESULT inj-event(handover_token_accepted(p_4,n,d)) ==> inj-event(token_received(p_4,n,ex)) is true.
+
+--------------------------------------------------------------
+Verification summary:
+
+Query not attacker(secret_probe[]) is true.
+
+Query inj-event(next_rsu_verified(p_4,n)) ==> inj-event(token_issued(p_4,n,ex)) is true.
+
+Query inj-event(vehicle_handover_verified(p_4,nv_2)) ==> inj-event(token_received(p_4,ho_3,ex)) is true.
+
+Query inj-event(handover_session(p_4,k_1)) ==> inj-event(vehicle_handover_verified(p_4,n)) is true.
+
+Query inj-event(handover_token_accepted(p_4,n,d)) ==> inj-event(token_received(p_4,n,ex)) is true.
+
+--------------------------------------------------------------
+
